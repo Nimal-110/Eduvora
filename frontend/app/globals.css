@@ -13,3 +13,28 @@
     --foreground: #ededed;
   }
 }
+@keyframes gradientMove {
+  0% {
+    background-position: 0% 50%;
+  }
+  100% {
+    background-position: 100% 50%;
+  }
+}
+
+.gradient-button {
+  background: linear-gradient(to right, #3b82f6, #9333ea); /* Blue → Purple */
+  background-size: 200% 200%;
+  transition: background-position 0.5s ease-in-out;
+  color: white;
+  padding: 12px 24px;
+  border-radius: 8px;
+  font-size: 16px;
+  font-weight: bold;
+  border: none;
+  cursor: pointer;
+}
+
+.gradient-button:hover {
+  background-position: 100% 50%; /* Moves gradient on hover */
+}

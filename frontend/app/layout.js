@@ -1,4 +1,3 @@
-
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -23,7 +22,9 @@ export default function RootLayout({ children }) {
       <body
         className="bg-white "
       >
-        {children}
+        <div className=" text-white">
+                  {children}
+            </div>
       </body>
     </html>
   );
