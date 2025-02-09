@@ -1,0 +1,217 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Styles */
+:root {
+  --primary-color: #2563eb; /* Blue */
+  --secondary-color: #1e40af; /* Darker Blue */
+  --background-color: #f3f4f6; /* Light Gray */
+  --text-color: #1f2937; /* Dark Gray */
+  --accent-color: #10b981; /* Green */
+  --border-radius: 0.375rem;
+  --transition-speed: 0.3s;
+  --box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+/* Global Styles */
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+  font-family: 'Inter', sans-serif;
+}
+
+body {
+  background-color: var(--background-color);
+  color: var(--text-color);
+  line-height: 1.6;
+  font-size: 16px;
+  transition: background-color var(--transition-speed);
+}
+
+html, body {
+  height: 100%;
+}
+
+/* Apply gradient background to body */
+body {
+  background-image: linear-gradient(to right, var(--primary-color), var(--secondary-color));
+  background-attachment: fixed;
+  background-size: cover;
+}
+
+/* Links */
+a {
+  color: var(--primary-color);
+  text-decoration: none;
+  transition: color var(--transition-speed);
+}
+
+a:hover {
+  color: var(--accent-color);
+  text-decoration: underline;
+}
+
+/* Navbar Styles */
+.navbar {
+  background-color: var(--primary-color);
+  box-shadow: var(--box-shadow);
+  padding: 1rem 2rem;
+}
+
+.navbar h1 {
+  color: white;
+  font-weight: 700;
+  font-size: 2rem;
+  letter-spacing: -0.025em;
+  transition: transform var(--transition-speed);
+}
+
+.navbar h1:hover {
+  transform: scale(1.05);
+}
+
+/* Button Styles */
+.button-primary {
+  background-color: var(--primary-color);
+  color: white;
+  padding: 0.75rem 1.5rem;
+  border-radius: var(--border-radius);
+  font-size: 1rem;
+  transition: background-color var(--transition-speed), transform var(--transition-speed);
+  display: inline-block;
+}
+
+.button-primary:hover {
+  background-color: var(--secondary-color);
+  transform: translateY(-3px);
+}
+
+/* Dropdown Styles */
+.dropdown {
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 1rem;
+  transition: opacity var(--transition-speed), transform var(--transition-speed);
+}
+
+.dropdown button {
+  color: var(--text-color);
+  padding: 0.75rem 1rem;
+  transition: background-color var(--transition-speed);
+}
+
+.dropdown button:hover {
+  background-color: var(--background-color);
+  transform: translateY(-2px);
+}
+
+/* Sidebar Styles */
+.sidebar {
+  background-color: var(--secondary-color);
+  box-shadow: 2px 0 6px rgba(0, 0, 0, 0.1);
+  width: 250px;
+  padding-top: 1.5rem;
+}
+
+.sidebar ul {
+  list-style: none;
+  padding-left: 1.5rem;
+}
+
+.sidebar ul li {
+  color: white;
+  padding: 1rem;
+  transition: background-color var(--transition-speed), transform var(--transition-speed);
+}
+
+.sidebar ul li:hover {
+  background-color: rgba(255, 255, 255, 0.1);
+  cursor: pointer;
+  transform: scale(1.05);
+}
+
+/* Dashboard Card Styles */
+.dashboard-card {
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  transition: transform var(--transition-speed), box-shadow var(--transition-speed);
+}
+
+.dashboard-card:hover {
+  transform: translateY(-5px);
+  box-shadow: 0 8px 16px rgba(0, 0, 0, 0.15);
+}
+
+/* Task List Styles */
+.task-list {
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  overflow: hidden;
+}
+
+.task-list li {
+  padding: 1rem;
+  border-bottom: 1px solid #e5e7eb;
+  transition: background-color var(--transition-speed), transform var(--transition-speed);
+}
+
+.task-list li:last-child {
+  border-bottom: none;
+}
+
+.task-list li:hover {
+  background-color: #f9fafb;
+  cursor: pointer;
+  transform: translateX(5px);
+}
+
+/* Map Container Styles */
+.map-container {
+  background-color: white;
+  border-radius: var(--border-radius);
+  box-shadow: var(--box-shadow);
+  padding: 1rem;
+}
+
+/* Fade-in Animation */
+@keyframes fadeIn {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+.fade-in {
+  animation: fadeIn 0.5s ease-in-out;
+}
+
+/* Smooth Scroll */
+html {
+  scroll-behavior: smooth;
+}
+
+/* Custom Scrollbars */
+::-webkit-scrollbar {
+  width: 10px;
+}
+
+::-webkit-scrollbar-thumb {
+  background-color: var(--primary-color);
+  border-radius: 10px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+  background-color: var(--secondary-color);
+}
+
+::-webkit-scrollbar-track {
+  background-color: #f1f1f1;
+  border-radius: 10px;
+}
