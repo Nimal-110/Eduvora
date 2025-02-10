@@ -2,17 +2,30 @@
 
 import { useState } from "react";
 import { Sidebar, Menu, MenuItem } from "react-pro-sidebar";
-import { Home, Calendar, MessageSquare, Award, User, Menu as MenuIcon, HomeIcon, CircleHelp } from "lucide-react";
+import { Home, Calendar, MessageSquare, Award, User, Menu as MenuIcon, HomeIcon, CircleHelp, Send } from "lucide-react";
 import Card from "@/components/Card";
 import SideCompo from "@/components/SideCompo";
-export default function Message() {
-  const [collapsed, setCollapsed] = useState(false);
+import { Chat } from "@/components/Chat";
 
+export default function Message() {
+  const [messages, setMessages] = useState([]);
+  const [input, setInput] = useState("");
+
+  const sendMessage = () => {
+    if (input.trim() !== "") {
+      setMessages([...messages, { text: input, sender: "user" }]);
+      setInput("");
+    }
+  };
+  
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 text-white">
       {/* Sidebar */}
       <div className="fixed w-60">
           <SideCompo/>
+      </div>
+      <div className="flex-1 p-6 ml-[250px] ">
+        <Chat/>
       </div>
     </div>
   );
