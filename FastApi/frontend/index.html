@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>WebRTC Peer-to-Peer</title>
+  <link rel="stylesheet" href="static/style.css" />
+</head>
+<body>
+  <h1>WebRTC Peer-to-Peer Connection</h1>
+  <input type="text" id="roomInput" placeholder="Enter Room Name" />
+  <button id="joinRoom">Join Room</button>
+  <br />
+  <button id="startWebcam" disabled>Start Webcam</button>
+  <button id="call" disabled>Call</button>
+  <button id="hangup" disabled>Hang Up</button>
+  <br />
+  <video id="localVideo" autoplay playsinline></video>
+  <video id="remoteVideo" autoplay playsinline></video>
+
+  <script>
+    let websocket = null;
+    let peerConnection = null;
+    let localStream = null;
+    let remoteStream = null;
+
+    const servers = {
+      iceServers: [
+        {
+          urls: ["stun:stun.l.google.com:19302", "stun:stun1.l.google.com:19302"],
+        },
+      ],
+    };
+
+    const roomInput = document.getElementById("roomInput");
+    const joinRoomButton = document.getElementById("joinRoom");
+    const startWebcamButton = document.getElementById("startWebcam");
+    const callButton = document.getElementById("call");
+    const hangupButton = document.getElementById("hangup");
+    const localVideo = document.getElementById("localVideo");
+    const remoteVideo = document.getElementById("remoteVideo");
+
+    joinRoomButton.onclick = () => {
+      const room = roomInput.value;
+      if (!room) return alert("Enter a room name");
+
+      websocket = new WebSocket(`ws://${window.location.host}/ws/${room}`);
+
+      websocket.onopen = () => {
+        console.log("Connected to WebSocket");
+        startWebcamButton.disabled = false;
+      };
+
+      websocket.onmessage = async (message) => {
+        const data = JSON.parse(message.data);
+        const { type, payload } = data;
+
+        if (type === "offer") {
+          peerConnection = createPeerConnection();
+          await peerConnection.setRemoteDescription(new RTCSessionDescription(payload));
+          const answer = await peerConnection.createAnswer();
+          await peerConnection.setLocalDescription(answer);
+
+          websocket.send(JSON.stringify({ type: "answer", payload: answer }));
+        } else if (type === "answer") {
+          await peerConnection.setRemoteDescription(new RTCSessionDescription(payload));
+        } else if (type === "candidate") {
+          if (peerConnection) {
+            await peerConnection.addIceCandidate(new RTCIceCandidate(payload));
+          }
+        }
+      };
+    };
+
+    startWebcamButton.onclick = async () => {
+      localStream = await navigator.mediaDevices.getUserMedia({ video: true, audio: true });
+      localVideo.srcObject = localStream;
+
+      remoteStream = new MediaStream();
+      remoteVideo.srcObject = remoteStream;
+
+      startWebcamButton.disabled = true;
+      callButton.disabled = false;
+    };
+
+    callButton.onclick = async () => {
+      peerConnection = createPeerConnection();
+      localStream.getTracks().forEach((track) => {
+        peerConnection.addTrack(track, localStream);
+      });
+
+      const offer = await peerConnection.createOffer();
+      await peerConnection.setLocalDescription(offer);
+
+      websocket.send(JSON.stringify({ type: "offer", payload: offer }));
+      callButton.disabled = true;
+      hangupButton.disabled = false;
+    };
+
+    hangupButton.onclick = () => {
+      peerConnection.close();
+      peerConnection = null;
+      hangupButton.disabled = true;
+      callButton.disabled = false;
+    };
+
+    function createPeerConnection() {
+      const pc = new RTCPeerConnection(servers);
+
+      pc.onicecandidate = (event) => {
+        if (event.candidate) {
+          websocket.send(JSON.stringify({ type: "candidate", payload: event.candidate }));
+        }
+      };
+
+      pc.ontrack = (event) => {
+        event.streams[0].getTracks().forEach((track) => {
+          remoteStream.addTrack(track);
+        });
+      };
+
+      return pc;
+    }
+  </script>
+  <style>
+    video {
+  width: 45%;
+  margin: 10px;
+  border: 2px solid black;
+  border-radius: 10px;
+}
+button {
+  margin: 10px;
+  padding: 10px 20px;
+}
+
+  </style>
+</body>
+</html>
