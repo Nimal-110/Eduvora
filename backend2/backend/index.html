@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Signup - Tutoring Platform</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      margin: 0;
+      padding: 0;
+      background-color: #f4f4f9;
+    }
+    .container {
+      max-width: 600px;
+      margin: 50px auto;
+      background: white;
+      padding: 20px;
+      border-radius: 10px;
+      box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+    }
+    h1 {
+      text-align: center;
+      color: #333;
+    }
+    form {
+      display: flex;
+      flex-direction: column;
+    }
+    label {
+      margin: 10px 0 5px;
+      font-weight: bold;
+    }
+    input, textarea, select, button {
+      padding: 10px;
+      font-size: 1rem;
+      margin-bottom: 15px;
+      border: 1px solid #ccc;
+      border-radius: 5px;
+    }
+    button {
+      background-color: #4CAF50;
+      color: white;
+      border: none;
+      cursor: pointer;
+    }
+    button:hover {
+      background-color: #45a049;
+    }
+    .error {
+      color: red;
+      font-size: 0.9em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>Signup</h1>
+    <form id="signup-form">
+      <label for="full_name">Full Name</label>
+      <input type="text" id="full_name" name="full_name" placeholder="Enter your full name" required>
+
+      <label for="email">Email</label>
+      <input type="email" id="email" name="email" placeholder="Enter your email address" required>
+
+      <label for="password_hash">Password</label>
+      <input type="password" id="password_hash" name="password_hash" placeholder="Enter your password" required>
+
+      <label for="bio">Bio</label>
+      <textarea id="bio" name="bio" rows="3" placeholder="Tell us about yourself"></textarea>
+
+      <label for="specialization">Specialization</label>
+      <input type="text" id="specialization" name="specialization" placeholder="e.g., Math, Science, etc.">
+
+      <label for="is_tutor">Are you a tutor?</label>
+      <select id="is_tutor" name="is_tutor" required>
+        <option value="false">No</option>
+        <option value="true">Yes</option>
+      </select>
+
+      <button type="submit">Sign Up</button>
+    </form>
+  </div>
+
+  <script>
+    document.getElementById('signup-form').addEventListener('submit', async (event) => {
+      event.preventDefault();
+
+      const formData = new FormData(event.target);
+      const user = {
+        full_name: formData.get('full_name'),
+        email: formData.get('email'),
+        password_hash: formData.get('password_hash'),
+        bio: formData.get('bio') || null,
+        specialization: formData.get('specialization') || null,
+        is_tutor: formData.get('is_tutor') === 'true'
+      };
+
+      const response = await fetch('/users', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(user)
+      });
+
+      const result = await response.json();
+
+      if (response.ok) {
+        alert(result.message);
+      } else {
+        alert(result.detail);
+      }
+    });
+  </script>
+</body>
+</html>
