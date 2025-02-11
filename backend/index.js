@@ -1,59 +1,70 @@
-const ws = require('ws')
-const uuid4 = require('uuid').v4
-const url = require('url')
-const express = require('express')
-const http = require('http')
+const ws = require("ws");
+const url = require("url");
+const http = require("http");
+const mongoose = require("mongoose");
+
+mongoose.connect("mongodb+srv://231501104:zFO6bsXbCQGDhyfA@nexathon.n4nqp.mongodb.net/?retryWrites=true&w=majority&appName=Nexathon", {
+    useNewUrlParser: true,
+    useUnifiedTopology: true,
+});
+
+// Message Schema & Model
+const MessageSchema = new mongoose.Schema({
+    roomId: String,
+    username: String,
+    message: String,
+    timestamp: { type: Date, default: Date.now },
+});
+
+const Message = mongoose.model("Message", MessageSchema);
 
 const server = http.createServer();
-
-let test = [];
 let connectionFunction = {};
 
+const websock = new ws.WebSocketServer({ server });
 
-const handMessage = (message,roomId)=>{
-    Object.keys(connectionFunction).forEach(uuid =>{
-        const confun = connectionFunction[uuid]
-        if (confun.roomId === roomId){
-            console.log(uuid)
-        }
-    })
+websock.on("connection", async (connections, req) => {
+    console.log("WebSocket connected...");
 
-}
-
-const handRemove = (username)=>{
-    // const mess = username.toString();
-    // console.log(username);
-    test = test.filter(user => user.username.trim() !== username.trim());
-    // test.pop();
-    // console.log(test)
-}
-
-const websock = new ws.WebSocketServer({server});
-
-websock.on("connection",(connections,req)=>{
-    console.log("websocket is connected...")
-    const { roomId, username } = url.parse(req.url,true).query;
-
-    test.push({
-        username,
-        roomId
-    })
-
-    const uuid = uuid4();
-
-    console.log(test);
+    const { roomId, username } = url.parse(req.url, true).query;
     connections.username = username;
     connections.roomId = roomId;
-    connections.uuid = uuid;
 
-    connectionFunction[uuid] = connections;
+    if (!connectionFunction[roomId]) {
+        connectionFunction[roomId] = [];
+    }
+    connectionFunction[roomId].push(connections);
 
-    console.log(username)
-    connections.on("message",(message)=>handMessage(message,connections.roomId));
-    connections.on("close",()=>{handRemove(connections.username)})
+    console.log(`User ${username} joined Room ${roomId}`);
 
-})
+    // Send previous messages from MongoDB to the user
+    const previousMessages = await Message.find({ roomId }).sort({ timestamp: 1 });
+    connections.send(JSON.stringify({ type: "previousMessages", data: previousMessages }));
 
-server.listen(8080,()=>{
-    console.log("server is connected");
-})
+    // Handle Incoming Messages
+    connections.on("message", async (message) => {
+        const messageData = message.toString();
+        console.log(`Message from ${username}: ${messageData}`);
+
+        // Save message to MongoDB
+        const newMessage = new Message({ roomId, username, message: messageData });
+        await newMessage.save();
+
+        // Broadcast message to the room
+        connectionFunction[roomId].forEach((client) => {
+            if (client.readyState === ws.OPEN) {
+                client.send(JSON.stringify({ type: "newMessage", username, message: messageData }));
+            }
+        });
+    });
+
+    // Handle Disconnection
+    connections.on("close", () => {
+        connectionFunction[roomId] = connectionFunction[roomId].filter(client => client !== connections);
+        console.log(`User ${username} disconnected from Room ${roomId}`);
+    });
+});
+
+server.listen(8080, () => {
+    console.log("WebSocket server running on port 8080...");
+});
