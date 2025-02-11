@@ -8,15 +8,47 @@ import SideCompo from "@/components/SideCompo";
 import { Chat } from "@/components/Chat";
 
 export default function Message() {
-  const [messages, setMessages] = useState([]);
-  const [input, setInput] = useState("");
-
-  const sendMessage = () => {
-    if (input.trim() !== "") {
-      setMessages([...messages, { text: input, sender: "user" }]);
-      setInput("");
-    }
-  };
+      const [messages, setMessages] = useState([]);
+      const [message, setMessage] = useState("");
+      // Ensure roomId and username are defined
+      if (!roomId || !username) {
+          return <div className="text-red-500">Error: Missing room ID or username.</div>;
+      }
+  
+      // WebSocket connection URL
+      const socketUrl = `ws://localhost:8080?roomId=${roomId}&username=${username}`;
+  
+      // WebSocket hook for communication
+      const { sendMessage, lastMessage, readyState } = useWebSocket(socketUrl, {
+          onOpen: () => console.log(`Connected to WebSocket as ${username}`),
+          onClose: () => console.log("Disconnected from WebSocket"),
+          shouldReconnect: () => true, // Auto-reconnect if disconnected
+      });
+  
+      // Load previous messages when received
+      useEffect(() => {
+          if (lastMessage !== null) {
+              try {
+                  const data = JSON.parse(lastMessage.data);
+                  if (data.type === "previousMessages") {
+                      setMessages(data.data); // Load chat history
+                  } else if (data.type === "newMessage") {
+                      setMessages((prev) => [...prev, data]); // Append new messages
+                  }
+              } catch (error) {
+                  console.error("Error parsing message:", error);
+              }
+          }
+      }, [lastMessage]);
+  
+      // Send Message to WebSocket (Including username)
+      const handleSendMessage = () => {
+          if (message.trim() !== "") {
+              const messageData = message;
+              sendMessage(messageData); // Send message as JSON
+              setMessage(""); // Clear input after sending
+          }
+      };
   
   return (
     <div className="flex min-h-screen bg-gradient-to-br from-blue-500 to-purple-600 text-white">

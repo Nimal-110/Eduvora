@@ -62,7 +62,7 @@ export default function Chat() {
             </div>
 
             {/* Message Input */}
-            <div className="flex mt-4">
+            <form className="flex mt-4" onSubmit={handleSendMessage}>
                 <input
                     type="text"
                     className="flex-1 p-2 bg-gray-800 border border-gray-700 rounded-lg"
@@ -76,7 +76,7 @@ export default function Chat() {
                 >
                     Send
                 </button>
-            </div>
+            </form>
         </div>
     );
 }
